@@ -1,0 +1,190 @@
+CREATE DATABASE Ecommerce;
+USE Ecommerce;
+
+
+-- Tabela Produto
+
+CREATE TABLE Produto (
+  idProduto INT NOT NULL AUTO_INCREMENT,
+  Categoria VARCHAR(15) NOT NULL,
+  Descricao VARCHAR(45) NOT NULL,
+  Valor FLOAT NOT NULL,
+  Dimensoes VARCHAR(10) NULL,
+  Ficha_tecnica TINYTEXT NOT NULL,
+  Nome_produto VARCHAR(45) NOT NULL,
+  PRIMARY KEY (idProduto));
+
+
+
+-- Tabela Cliente
+
+CREATE TABLE Cliente (
+  idCliente INT NOT NULL AUTO_INCREMENT,
+  Pnome VARCHAR(15) NOT NULL,
+  Nome_meio VARCHAR(15) NOT NULL,
+  Sobrenome VARCHAR(15) NOT NULL,
+  CPF VARCHAR(11) NOT NULL,
+  email VARCHAR(60) NOT NULL,
+  ddd CHAR(2) NOT NULL,
+  telefone VARCHAR(10) NOT NULL,
+  PRIMARY KEY (idCliente),
+  CONSTRAINT CPF_UNIQUE UNIQUE (CPF),
+  CONSTRAINT email_UNIQUE UNIQUE (email));
+
+
+
+-- Table Estoque
+
+CREATE TABLE Estoque (
+  idEstoque INT NOT NULL AUTO_INCREMENT,
+  Local VARCHAR(45) NOT NULL,
+  Responsavel VARCHAR(45) NOT NULL,
+  PRIMARY KEY (idEstoque));
+
+
+
+-- TabelaFornecedor
+
+CREATE TABLE Fornecedor (
+  idFornecedor INT NOT NULL AUTO_INCREMENT,
+  Razao Social VARCHAR(45) NOT NULL,
+  CNPJ VARCHAR(16) NOT NULL,
+  endereco VARCHAR(45) NOT NULL,
+  email VARCHAR(60) NOT NULL,
+  ddd CHAR(2) NOT NULL,
+  telefone VARCHAR(11) NOT NULL,
+  Categoria_produto VARCHAR(45) NULL,
+  PRIMARY KEY (idFornecedor),
+  CONSTRAINT email_UNIQUE UNIQUE (email));
+
+
+
+-- Tabela Pedido
+
+CREATE TABLE Pedido (
+  idPedido INT NOT NULL AUTO_INCREMENT,
+  Status ENUM('Iniciado', 'Pendente', 'Confirmado', 'Em separação', 'Enviado', 'Entregue', 'Devolvido') NOT NULL,
+  Descricao TINYTEXT NULL,
+  Cliente_idCliente INT NOT NULL,
+  Frete FLOAT NOT NULL DEFAULT 0,
+  Status de Entrega ENUM('Postado', 'Em transito', 'Tentando entregar', 'Entregue', 'Devolvido', 'Sem rastro') NOT NULL DEFAULT 'Sem rastro',
+  Codigo_rastreamento VARCHAR(45) NOT NULL DEFAULT 'XXX',
+  Meio_pagamento ENUM('PIX', 'BOLETO', 'CARTAO', 'DOIS CARTOES') NOT NULL,
+  PRIMARY KEY (idPedido, Cliente_idCliente),
+  CONSTRAINT fk_Pedido_Cliente1
+    FOREIGN KEY (Cliente_idCliente)
+    REFERENCES Cliente (idCliente));
+
+
+
+-- Tabela Disponibiliza_um_produto
+
+CREATE TABLE Disponibiliza_um_produto (
+  Produto_idProduto INT NOT NULL,
+  Fornecedor_idFornecedor INT NOT NULL,
+  PRIMARY KEY (Produto_idProduto, Fornecedor_idFornecedor),
+  CONSTRAINT fk_Produto_has_Fornecedor_Produto
+    FOREIGN KEY (Produto_idProduto)
+    REFERENCES Produto (idProduto),
+  CONSTRAINT fk_Produto_has_Fornecedor_Fornecedor1
+    FOREIGN KEY (Fornecedor_idFornecedor)
+    REFERENCES Fornecedor (idFornecedor));
+
+
+
+-- Tabela Produto_em_estoque
+
+CREATE TABLE Produto_em_estoque (
+  Produto_idProduto INT NOT NULL,
+  Estoque_idEstoque INT NOT NULL,
+  Quantidade INT NOT NULL,
+  PRIMARY KEY (Produto_idProduto, Estoque_idEstoque),
+  CONSTRAINT fk_Produto_has_Estoque_Produto1
+    FOREIGN KEY (Produto_idProduto)
+    REFERENCES Produto (idProduto),
+  CONSTRAINT fk_Produto_has_Estoque_Estoque1
+    FOREIGN KEY (Estoque_idEstoque)
+    REFERENCES Estoque (idEstoque));
+
+
+
+-- TabelaRelacao_produto_pedido
+
+CREATE TABLE Relacao_produto_pedido (
+  Produto_idProduto INT NOT NULL,
+  Pedido_idPedido INT NOT NULL,
+  Quantidade INT NOT NULL,
+  PRIMARY KEY (Produto_idProduto, Pedido_idPedido),
+  CONSTRAINT fk_Produto_has_Pedido_Produto1
+    FOREIGN KEY (Produto_idProduto)
+    REFERENCES Produto (idProduto),
+  CONSTRAINT fk_Produto_has_Pedido_Pedido1
+    FOREIGN KEY (Pedido_idPedido)
+    REFERENCES Pedido (idPedido));
+
+
+
+-- Tabela Terceiro_vendedor
+
+CREATE TABLE Terceiro_vendedor (
+  idTerceiro Vendedor INT NOT NULL AUTO_INCREMENT,
+  Razao Social VARCHAR(45) NOT NULL,
+  Endereco VARCHAR(45) NOT NULL,
+  CNPJ VARCHAR(16) NOT NULL,
+  email VARCHAR(60) NOT NULL,
+  ddd CHAR(2) NOT NULL,
+  telefone VARCHAR(11) NOT NULL,
+  PRIMARY KEY (idTerceiro Vendedor));
+
+
+
+-- Tabela Produtos_por_vendedor
+
+CREATE TABLE .Produtos_por_vendedor (
+  Produto_idProduto INT NOT NULL,
+  Terceiro_vendedor_idTerceiro_Vendedor INT NOT NULL,
+  Quantidade INT NOT NULL,
+  PRIMARY KEY (Produto_idProduto, Terceiro_vendedor_idTerceiro_Vendedor),
+  CONSTRAINT fk_Produto_has_Terceiro Vendedor_Produto1
+    FOREIGN KEY (Produto_idProduto)
+    REFERENCES Produto (idProduto),
+  CONSTRAINT fk_Produto_has_Terceiro Vendedor_Terceiro Vendedor1
+    FOREIGN KEY (Terceiro_vendedor_idTerceiro_Vendedor)
+    REFERENCES Terceiro_vendedor (idTerceiro_Vendedor));
+
+
+
+-- Tabela Cartao
+
+CREATE TABLE Cartao (
+  idCartao INT NOT NULL AUTO_INCREMENT,
+  Bandeira VARCHAR(45) NOT NULL,
+  Numero VARCHAR(45) NOT NULL,
+  Nome VARCHAR(45) NOT NULL,
+  Validade_mes VARCHAR(45) NOT NULL,
+  Validade_ano VARCHAR(45) NOT NULL,
+  Cliente_idCliente INT NOT NULL,
+  PRIMARY KEY (idCartao, Cliente_idCliente),
+  CONSTRAINT fk_Cartao_Cliente1
+    FOREIGN KEY (Cliente_idCliente)
+    REFERENCES Cliente (idCliente));
+
+
+
+-- Tabela Endereco_Cliente
+
+CREATE TABLE Endereco_Cliente (
+  idEndereco_Cliente INT NOT NULL AUTO_INCREMENT,
+  CEP INT NOT NULL,
+  logradouro VARCHAR(45) NOT NULL,
+  numero VARCHAR(5) NOT NULL,
+  complemento VARCHAR(10) NULL,
+  bairro VARCHAR(45) NULL,
+  cidade VARCHAR(45) NOT NULL,
+  uf CHAR(2) NOT NULL,
+  tipo ENUM('Residencial', 'Comercial') NOT NULL,
+  Cliente_idCliente INT NOT NULL,
+  PRIMARY KEY (idEndereco_Cliente, Cliente_idCliente),
+  CONSTRAINT fk_Endereco_Cliente_Cliente1
+    FOREIGN KEY (Cliente_idCliente)
+    REFERENCES Cliente (idCliente));
